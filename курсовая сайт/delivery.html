@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доставка и оплата — Orders</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<input type="checkbox" id="menu-toggle" class="menu-checkbox">
+<header class="header">
+    <label for="menu-toggle" class="menu-toggle" aria-label="Меню">
+        <span></span><span></span><span></span>
+    </label>
+    <a href="index.html" class="logo">ORDERS</a>
+    <div class="header-icons">
+        <a href="index.html" class="home-link">Главная</a>
+        <a href="favorites.html" class="icon-link">
+            <img src="png-transparent-computer-icons-bookmark-others-lov-no-bg-preview (carve.photos).png" alt="Избранное" width="24" height="24">
+            <span class="badge" id="favoritesCount">0</span>
+        </a>
+        <a href="cart.html" class="icon-link">
+            <img src="11420218-no-bg-preview (carve.photos).png" alt="Корзина" width="24" height="24">
+            <span class="badge" id="cartCount">0</span>
+        </a>
+    </div>
+</header>
+
+<div class="drawer">
+    <div class="drawer-header">Меню</div>
+    <nav class="drawer-nav">
+        <a href="about.html">О нас</a>
+        <a href="delivery.html">Доставка и оплата</a>
+        <a href="profile.html">Личный кабинет</a>
+        <a href="#footer">Контакты</a>
+        <a href="admin.html">Админ-панель</a>
+    </nav>
+</div>
+<label for="menu-toggle" class="overlay"></label>
+
+<div class="auth-bar" id="authBar">
+    <button class="auth-btn" id="loginBtn">Войти</button>
+    <button class="auth-btn" id="registerBtn">Регистрация</button>
+</div>
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <h3>Вход / Регистрация</h3>
+        <input type="text" id="authName" placeholder="Ваше имя" required>
+        <input type="email" id="authEmail" placeholder="Email" required>
+        <button id="submitAuth">Продолжить</button>
+        <button id="closeModal">Отмена</button>
+    </div>
+</div>
+
+<div class="delivery-page">
+    <h1>Доставка и оплата</h1>
+    <h2>Способы доставки</h2>
+    <ul>
+        <li><strong>Почта России</strong> — отправка заказным письмом или посылкой. Срок доставки 5–14 дней. Стоимость рассчитывается автоматически по тарифам почты.</li>
+        <li><strong>Курьерская служба СДЭК</strong> — доставка до двери. Срок 2–5 дней. Вы можете отслеживать заказ по трек‑номеру.</li>
+        <li><strong>Самовывоз</strong> — из нашего шоурума в [ваш город]. Бесплатно, по предварительной договорённости.</li>
+    </ul>
+    <h2>Способы оплаты</h2>
+    <ul>
+        <li><strong>Банковская карта</strong> (Visa, Mastercard, Мир) — онлайн на сайте через защищённое соединение.</li>
+        <li><strong>Наличные при получении</strong> — оплата курьеру или в пункте выдачи.</li>
+        <li><strong>Перевод по номеру телефона</strong> (СБП) — быстрый перевод через систему быстрых платежей.</li>
+    </ul>
+    <h2>Возврат и обмен</h2>
+    <p>Вы можете вернуть или обменять товар в течение 14 дней с момента получения, если он не был в использовании и сохранена товарная упаковка. Для этого свяжитесь с нами по email или телефону.</p>
+    <div class="contact-info">
+        <h2>Остались вопросы?</h2>
+        <p>Email: info@orders.ru<br>Телефон: +7 (XXX) XXX-XX-XX</p>
+    </div>
+</div>
+
+<footer class="site-footer" id="footer">
+    <div class="footer-content">
+        <p class="footer-text">Мы дорожим своей репутацией, поэтому каждый заказ проходит проверку перед отправкой. Вы всегда можете обратиться к нам для обмена, возврата или консультации.</p>
+        <div class="footer-contacts">
+            <div class="contact-item">- Email: info@orders.ru</div>
+            <div class="contact-item">- Телефон: +7 (XXX) XXX-XX-XX</div>
+            <div class="contact-item">- Адрес: [ваш город], ул. [улица], д. [дом]</div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // ================== ОБЩАЯ ЛОГИКА (та же, что в about.html) ==================
+    const products = [
+        { id: 1, name: "Орден Ленина", price: 3500 },
+        { id: 2, name: "Орден Красной Звезды", price: 3200 },
+        { id: 3, name: "Орден Отечественной войны", price: 4100 },
+        { id: 4, name: "Медаль «За отвагу»", price: 1800 },
+        { id: 5, name: "Медаль «За безупречную службу»", price: 1600 },
+        { id: 6, name: "Знак «За заслуги»", price: 700 },
+        { id: 7, name: "Медаль «Ветерану боевых действий»", price: 1500 },
+        { id: 8, name: "Знак «Участник боевых действий»", price: 1200 },
+        { id: 100, name: "Футляр для ордена", price: 450 },
+        { id: 101, name: "Футляр для медали", price: 400 },
+        { id: 102, name: "Планшет для наград", price: 1200 }
+    ];
+
+    let currentUser = null;
+    let cart = [];
+    let favorites = [];
+
+    const authBar = document.getElementById('authBar');
+    const authModal = document.getElementById('authModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const submitAuthBtn = document.getElementById('submitAuth');
+    const authNameInput = document.getElementById('authName');
+    const authEmailInput = document.getElementById('authEmail');
+    const cartCountSpan = document.getElementById('cartCount');
+    const favoritesCountSpan = document.getElementById('favoritesCount');
+
+    function saveUserSession() {
+        if (currentUser) {
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            localStorage.setItem('cart', JSON.stringify(cart));
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        } else {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('cart');
+            localStorage.removeItem('favorites');
+        }
+    }
+
+    function loadUserSession() {
+        const user = localStorage.getItem('currentUser');
+        if (user) {
+            currentUser = JSON.parse(user);
+            cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        } else {
+            currentUser = null;
+            cart = [];
+            favorites = [];
+        }
+        updateAuthUI();
+        updateCounters();
+    }
+
+    function updateAuthUI() {
+        if (currentUser) {
+            authBar.innerHTML = `
+                <div class="user-info">
+                    <span>Привет, ${currentUser.name}!</span>
+                    <button class="logout-btn" id="logoutBtn">Выйти</button>
+                </div>
+            `;
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        } else {
+            authBar.innerHTML = `
+                <button class="auth-btn" id="loginBtn">Войти</button>
+                <button class="auth-btn" id="registerBtn">Регистрация</button>
+            `;
+            document.getElementById('loginBtn').addEventListener('click', () => openModal());
+            document.getElementById('registerBtn').addEventListener('click', () => openModal());
+        }
+        updateTooltips();
+    }
+
+    function logout() {
+        currentUser = null;
+        cart = [];
+        favorites = [];
+        saveUserSession();
+        updateAuthUI();
+        updateCounters();
+    }
+
+    function openModal() {
+        authModal.classList.add('active');
+    }
+    function closeModal() {
+        authModal.classList.remove('active');
+        authNameInput.value = '';
+        authEmailInput.value = '';
+    }
+    function handleAuth() {
+        const name = authNameInput.value.trim();
+        const email = authEmailInput.value.trim();
+        if (!name || !email) {
+            alert('Введите имя и email');
+            return;
+        }
+        currentUser = { name, email };
+        cart = [];
+        favorites = [];
+        saveUserSession();
+        closeModal();
+        updateAuthUI();
+        updateCounters();
+    }
+
+    function updateCounters() {
+        const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
+        if (cartCountSpan) cartCountSpan.textContent = totalItems;
+        if (favoritesCountSpan) favoritesCountSpan.textContent = favorites.length;
+    }
+
+    function updateTooltips() {
+        const cartLink = document.querySelector('.icon-link[href="cart.html"]');
+        const favLink = document.querySelector('.icon-link[href="favorites.html"]');
+        if (cartLink) cartLink.title = currentUser ? 'Корзина' : 'Войдите в аккаунт, чтобы открыть корзину';
+        if (favLink) favLink.title = currentUser ? 'Избранное' : 'Войдите в аккаунт, чтобы открыть избранное';
+    }
+
+    function init() {
+        loadUserSession();
+        if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+        if (submitAuthBtn) submitAuthBtn.addEventListener('click', handleAuth);
+        window.addEventListener('click', (e) => {
+            if (e.target === authModal) closeModal();
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>
