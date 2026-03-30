@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель — Orders</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .admin-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #f8e2b1;
+            display: inline-block;
+        }
+        .admin-orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+        .admin-orders-table th,
+        .admin-orders-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .admin-orders-table th {
+            background: #f8e2b1;
+        }
+        .status-select {
+            padding: 4px 8px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+        .update-status {
+            background: #1e2a2e;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .empty-orders {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #666;
+            background: white;
+            border-radius: 24px;
+        }
+        .logout-admin {
+            display: inline-block;
+            margin-top: 1rem;
+            background: #b45f2b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<input type="checkbox" id="menu-toggle" class="menu-checkbox">
+<header class="header">
+    <label for="menu-toggle" class="menu-toggle" aria-label="Меню">
+        <span></span><span></span><span></span>
+    </label>
+    <a href="index.html" class="logo">ORDERS</a>
+    <div class="header-icons">
+        <a href="index.html" class="home-link">Главная</a>
+        <a href="favorites.html" class="icon-link">
+            <img src="images/png-transparent-computer-icons-bookmark-others-lov-no-bg-preview (carve.photos).png" alt="Избранное" width="24" height="24">
+            <span class="badge" id="favoritesCount">0</span>
+        </a>
+        <a href="cart.html" class="icon-link">
+            <img src="images/11420218-no-bg-preview (carve.photos).png" alt="Корзина" width="24" height="24">
+            <span class="badge" id="cartCount">0</span>
+        </a>
+    </div>
+</header>
+
+<div class="drawer">
+    <div class="drawer-header">Меню</div>
+    <nav class="drawer-nav">
+        <a href="about.html">О нас</a>
+        <a href="delivery.html">Доставка и оплата</a>
+        <a href="profile.html">Личный кабинет</a>
+        <a href="#footer">Контакты</a>
+        <a href="#" id="adminMenuLink">Админ-панель</a>
+    </nav>
+</div>
+<label for="menu-toggle" class="overlay"></label>
+
+<div class="auth-bar" id="authBar">
+    <button class="auth-btn" id="loginBtn">Войти</button>
+    <button class="auth-btn" id="registerBtn">Регистрация</button>
+</div>
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <h3>Вход / Регистрация</h3>
+        <input type="text" id="authName" placeholder="Ваше имя" required>
+        <input type="email" id="authEmail" placeholder="Email" required>
+        <input type="password" id="authPassword" placeholder="Пароль" required>
+        <div class="captcha-block">
+            <p id="captchaQuestion">Сколько будет 5 + 3?</p>
+            <input type="text" id="captchaAnswer" placeholder="Ответ" required>
+        </div>
+        <button id="submitAuth">Продолжить</button>
+        <button id="closeModal">Отмена</button>
+    </div>
+</div>
+<div id="adminPasswordModal" class="modal">
+    <div class="modal-content">
+        <h3>Доступ к админ-панели</h3>
+        <p>Введите пароль администратора:</p>
+        <input type="password" id="adminPassword" placeholder="Пароль" required>
+        <button id="submitAdminPassword">Войти</button>
+        <button id="closeAdminModal">Отмена</button>
+    </div>
+</div>
+
+<div class="admin-container">
+    <h1 class="admin-title">Административная панель</h1>
+    <div id="adminContent"></div>
+    <button class="logout-admin" id="logoutAdmin">Выйти из админки</button>
+</div>
+
+<footer class="site-footer" id="footer">
+    <div class="footer-content">
+        <p class="footer-text">Мы дорожим своей репутацией, поэтому каждый заказ проходит проверку перед отправкой. Вы всегда можете обратиться к нам для обмена, возврата или консультации.</p>
+        <div class="footer-contacts">
+            <div class="contact-item">- Email: info@orders.ru</div>
+            <div class="contact-item">- Телефон: +7 (995) 995-24-67</div>
+            <div class="contact-item">- Адрес: г. Москва, ул. Мира, д. 11</div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    if (!localStorage.getItem('isAdmin')) {
+        alert('Доступ запрещён. Только для администратора.');
+        window.location.href = 'index.html';
+    }
+
+    let currentUser = null;
+    let orders = [];
+
+    const authBar = document.getElementById('authBar');
+    const authModal = document.getElementById('authModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const submitAuthBtn = document.getElementById('submitAuth');
+    const authNameInput = document.getElementById('authName');
+    const authEmailInput = document.getElementById('authEmail');
+    const authPasswordInput = document.getElementById('authPassword');
+    const cartCountSpan = document.getElementById('cartCount');
+    const favoritesCountSpan = document.getElementById('favoritesCount');
+    const adminPasswordModal = document.getElementById('adminPasswordModal');
+    const adminPasswordInput = document.getElementById('adminPassword');
+    const submitAdminPassword = document.getElementById('submitAdminPassword');
+    const closeAdminModal = document.getElementById('closeAdminModal');
+    const adminMenuLink = document.getElementById('adminMenuLink');
+
+    let captchaValue = 0;
+    function generateCaptcha() {
+        const num1 = Math.floor(Math.random() * 10) + 1;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+        captchaValue = num1 + num2;
+        const question = `Сколько будет ${num1} + ${num2}?`;
+        const captchaQuestion = document.getElementById('captchaQuestion');
+        if (captchaQuestion) captchaQuestion.textContent = question;
+    }
+
+    async function checkSession() {
+        try {
+            const response = await fetch('api/check_session.php');
+            const data = await response.json();
+            if (data.logged_in) {
+                currentUser = data.user;
+                updateAuthUI();
+            } else {
+                currentUser = null;
+                updateAuthUI();
+            }
+        } catch (error) {
+            currentUser = null;
+            updateAuthUI();
+        }
+    }
+
+    function updateAuthUI() {
+        if (currentUser) {
+            authBar.innerHTML = `<div class="user-info">
+                <span>Привет, ${currentUser.name}!</span>
+                <button class="logout-btn" id="logoutBtn">Выйти</button>
+            </div>`;
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) logoutBtn.addEventListener('click', logout);
+        } else {
+            authBar.innerHTML = `<button class="auth-btn" id="loginBtn">Войти</button>
+                <button class="auth-btn" id="registerBtn">Регистрация</button>`;
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            if (loginBtn) loginBtn.addEventListener('click', () => openModal());
+            if (registerBtn) registerBtn.addEventListener('click', () => openModal());
+        }
+        updateTooltips();
+    }
+
+    async function logout() {
+        await fetch('api/logout.php', { method: 'POST' });
+        currentUser = null;
+        updateAuthUI();
+        updateCounters();
+    }
+
+    function openModal() {
+        if (authModal) {
+            authModal.classList.add('active');
+            generateCaptcha();
+            const answerInput = document.getElementById('captchaAnswer');
+            if (answerInput) answerInput.value = '';
+            if (authPasswordInput) authPasswordInput.value = '';
+        }
+    }
+    function closeModal() {
+        if (authModal) authModal.classList.remove('active');
+        if (authNameInput) authNameInput.value = '';
+        if (authEmailInput) authEmailInput.value = '';
+        if (authPasswordInput) authPasswordInput.value = '';
+        const captchaAnswer = document.getElementById('captchaAnswer');
+        if (captchaAnswer) captchaAnswer.value = '';
+    }
+
+    async function handleAuth() {
+        const name = authNameInput.value.trim();
+        const email = authEmailInput.value.trim();
+        const password = authPasswordInput.value.trim();
+        const captchaAnswer = document.getElementById('captchaAnswer');
+        const answer = parseInt(captchaAnswer.value.trim());
+
+        if (!name || !email || !password) {
+            alert('Заполните все поля');
+            return;
+        }
+        if (isNaN(answer) || answer !== captchaValue) {
+            alert('Неверный ответ на проверочный вопрос');
+            generateCaptcha();
+            captchaAnswer.value = '';
+            return;
+        }
+
+        let response = await fetch('api/register.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+        });
+        let result = await response.json();
+
+        if (result.success) {
+            currentUser = result.user;
+            closeModal();
+            updateAuthUI();
+        } else {
+            response = await fetch('api/login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            result = await response.json();
+            if (result.success) {
+                currentUser = result.user;
+                closeModal();
+                updateAuthUI();
+            } else {
+                alert(result.error);
+            }
+        }
+    }
+
+    function updateTooltips() {
+        const cartLink = document.querySelector('.icon-link[href="cart.html"]');
+        const favLink = document.querySelector('.icon-link[href="favorites.html"]');
+        if (cartLink) cartLink.title = currentUser ? 'Корзина' : 'Войдите в аккаунт, чтобы открыть корзину';
+        if (favLink) favLink.title = currentUser ? 'Избранное' : 'Войдите в аккаунт, чтобы открыть избранное';
+    }
+
+    async function updateCounters() {
+        try {
+            const cartResp = await fetch('api/cart.php');
+            const cartData = await cartResp.json();
+            const totalItems = (cartData.items || []).reduce((s, i) => s + i.quantity, 0);
+            if (cartCountSpan) cartCountSpan.textContent = totalItems;
+
+            const favResp = await fetch('api/favorites.php');
+            const favData = await favResp.json();
+            if (favoritesCountSpan) favoritesCountSpan.textContent = (favData.favorites || []).length;
+        } catch (error) {}
+    }
+
+    async function loadOrders() {
+        try {
+            const response = await fetch('api/admin/orders.php');
+            orders = await response.json();
+            renderAdmin();
+        } catch (error) {
+            orders = [];
+            renderAdmin();
+        }
+    }
+
+    async function updateOrderStatus(orderId, newStatus) {
+        const response = await fetch('api/admin/orders.php', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: orderId, status: newStatus })
+        });
+        const result = await response.json();
+        if (result.success) {
+            await loadOrders();
+        } else {
+            alert('Ошибка обновления статуса');
+        }
+    }
+
+    function renderAdmin() {
+        const container = document.getElementById('adminContent');
+        if (!container) return;
+
+        if (orders.length === 0) {
+            container.innerHTML = '<div class="empty-orders">Нет заказов.</div>';
+            return;
+        }
+
+        let html = '<table class="admin-orders-table"><thead><tr>' +
+            '<th>ID</th><th>Дата</th><th>Клиент</th><th>Сумма</th><th>Статус</th><th>Действие</th>' +
+            '</tr></thead><tbody>';
+        orders.forEach(order => {
+            html += `
+                <tr>
+                    <td>${order.id}</td>
+                    <td>${new Date(order.order_date).toLocaleString()}</td>
+                    <td>${order.name || 'Гость'}<br><small>${order.email || ''}</small><br><small>${order.phone || ''}</small></td>
+                    <td>${order.total_amount} ₽</td>
+                    <td>
+                        <select class="status-select" data-id="${order.id}">
+                            <option value="Новый" ${order.status === 'Новый' ? 'selected' : ''}>Новый</option>
+                            <option value="Оплачен" ${order.status === 'Оплачен' ? 'selected' : ''}>Оплачен</option>
+                            <option value="Отправлен" ${order.status === 'Отправлен' ? 'selected' : ''}>Отправлен</option>
+                            <option value="Завершён" ${order.status === 'Завершён' ? 'selected' : ''}>Завершён</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="update-status" data-id="${order.id}">Обновить</button>
+                    </td>
+                </tr>
+            `;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+
+        document.querySelectorAll('.update-status').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const orderId = parseInt(btn.dataset.id);
+                const select = document.querySelector(`.status-select[data-id="${orderId}"]`);
+                const newStatus = select.value;
+                updateOrderStatus(orderId, newStatus);
+            });
+        });
+    }
+
+    function openAdminPasswordModal() {
+        if (adminPasswordModal) adminPasswordModal.classList.add('active');
+        if (adminPasswordInput) adminPasswordInput.value = '';
+    }
+    function closeAdminPasswordModal() {
+        if (adminPasswordModal) adminPasswordModal.classList.remove('active');
+    }
+    function checkAdminPassword() {
+        const password = adminPasswordInput ? adminPasswordInput.value.trim() : '';
+        if (password === '4321') {
+            closeAdminPasswordModal();
+            localStorage.setItem('isAdmin', 'true');
+            location.reload();
+        } else {
+            alert('Неверный пароль');
+            if (adminPasswordInput) adminPasswordInput.value = '';
+        }
+    }
+
+    const logoutAdminBtn = document.getElementById('logoutAdmin');
+    if (logoutAdminBtn) {
+        logoutAdminBtn.addEventListener('click', () => {
+            localStorage.removeItem('isAdmin');
+            window.location.href = 'index.html';
+        });
+    }
+
+    async function init() {
+        await checkSession();
+        if (localStorage.getItem('isAdmin')) {
+            await loadOrders();
+        }
+
+        if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+        if (submitAuthBtn) submitAuthBtn.addEventListener('click', handleAuth);
+        if (submitAdminPassword) submitAdminPassword.addEventListener('click', checkAdminPassword);
+        if (closeAdminModal) closeAdminModal.addEventListener('click', closeAdminPasswordModal);
+        if (adminMenuLink) {
+            adminMenuLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                openAdminPasswordModal();
+            });
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === authModal) closeModal();
+            if (e.target === adminPasswordModal) closeAdminPasswordModal();
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>

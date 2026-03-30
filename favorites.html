@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Избранное — Orders</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .favorites-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .favorites-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #f8e2b1;
+            display: inline-block;
+        }
+        .favorites-items {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 1rem;
+        }
+        .favorites-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 0.5fr;
+            font-weight: bold;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 10px;
+        }
+        .favorites-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 0.5fr;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .favorites-item-title {
+            font-weight: 500;
+        }
+        .favorites-item-price {
+            color: #b45f2b;
+        }
+        .favorites-remove {
+            background: none;
+            border: none;
+            color: #b91c1c;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #f0f0f0;
+        }
+        .add-to-cart-fav {
+            background: #1e2a2e;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .empty-favorites {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+        .favorites-actions {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .btn {
+            background: #1e2a2e;
+            color: #f9e0a8;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<input type="checkbox" id="menu-toggle" class="menu-checkbox">
+<header class="header">
+    <label for="menu-toggle" class="menu-toggle" aria-label="Меню">
+        <span></span><span></span><span></span>
+    </label>
+    <a href="index.html" class="logo">ORDERS</a>
+    <div class="header-icons">
+        <a href="index.html" class="home-link">Главная</a>
+        <a href="favorites.html" class="icon-link">
+            <img src="images/png-transparent-computer-icons-bookmark-others-lov-no-bg-preview (carve.photos).png" alt="Избранное" width="24" height="24">
+            <span class="badge" id="favoritesCount">0</span>
+        </a>
+        <a href="cart.html" class="icon-link">
+            <img src="images/11420218-no-bg-preview (carve.photos).png" alt="Корзина" width="24" height="24">
+            <span class="badge" id="cartCount">0</span>
+        </a>
+    </div>
+</header>
+
+<div class="drawer">
+    <div class="drawer-header">Меню</div>
+    <nav class="drawer-nav">
+        <a href="about.html">О нас</a>
+        <a href="delivery.html">Доставка и оплата</a>
+        <a href="profile.html">Личный кабинет</a>
+        <a href="#footer">Контакты</a>
+        <a href="#" id="adminMenuLink">Админ-панель</a>
+    </nav>
+</div>
+<label for="menu-toggle" class="overlay"></label>
+
+<div class="auth-bar" id="authBar">
+    <button class="auth-btn" id="loginBtn">Войти</button>
+    <button class="auth-btn" id="registerBtn">Регистрация</button>
+</div>
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <h3>Вход / Регистрация</h3>
+        <input type="text" id="authName" placeholder="Ваше имя" required>
+        <input type="email" id="authEmail" placeholder="Email" required>
+        <input type="password" id="authPassword" placeholder="Пароль" required>
+        <div class="captcha-block">
+            <p id="captchaQuestion">Сколько будет 5 + 3?</p>
+            <input type="text" id="captchaAnswer" placeholder="Ответ" required>
+        </div>
+        <button id="submitAuth">Продолжить</button>
+        <button id="closeModal">Отмена</button>
+    </div>
+</div>
+<div id="adminPasswordModal" class="modal">
+    <div class="modal-content">
+        <h3>Доступ к админ-панели</h3>
+        <p>Введите пароль администратора:</p>
+        <input type="password" id="adminPassword" placeholder="Пароль" required>
+        <button id="submitAdminPassword">Войти</button>
+        <button id="closeAdminModal">Отмена</button>
+    </div>
+</div>
+
+<div class="favorites-container">
+    <h1 class="favorites-title">Избранное</h1>
+    <div id="favoritesContent"></div>
+</div>
+
+<footer class="site-footer" id="footer">
+    <div class="footer-content">
+        <p class="footer-text">Мы дорожим своей репутацией, поэтому каждый заказ проходит проверку перед отправкой. Вы всегда можете обратиться к нам для обмена, возврата или консультации.</p>
+        <div class="footer-contacts">
+            <div class="contact-item">- Email: info@orders.ru</div>
+            <div class="contact-item">- Телефон: +7 (995) 995-24-67</div>
+            <div class="contact-item">- Адрес: г. Москва, ул. Мира, д. 11</div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    let currentUser = null;
+    let favorites = [];
+
+    const authBar = document.getElementById('authBar');
+    const authModal = document.getElementById('authModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const submitAuthBtn = document.getElementById('submitAuth');
+    const authNameInput = document.getElementById('authName');
+    const authEmailInput = document.getElementById('authEmail');
+    const authPasswordInput = document.getElementById('authPassword');
+    const cartCountSpan = document.getElementById('cartCount');
+    const favoritesCountSpan = document.getElementById('favoritesCount');
+    const adminPasswordModal = document.getElementById('adminPasswordModal');
+    const adminPasswordInput = document.getElementById('adminPassword');
+    const submitAdminPassword = document.getElementById('submitAdminPassword');
+    const closeAdminModal = document.getElementById('closeAdminModal');
+    const adminMenuLink = document.getElementById('adminMenuLink');
+
+    let captchaValue = 0;
+    function generateCaptcha() {
+        const num1 = Math.floor(Math.random() * 10) + 1;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+        captchaValue = num1 + num2;
+        const question = `Сколько будет ${num1} + ${num2}?`;
+        const captchaQuestion = document.getElementById('captchaQuestion');
+        if (captchaQuestion) captchaQuestion.textContent = question;
+    }
+
+    async function checkSession() {
+        try {
+            const response = await fetch('api/check_session.php');
+            const data = await response.json();
+            if (data.logged_in) {
+                currentUser = data.user;
+                updateAuthUI();
+                await loadFavorites();
+            } else {
+                currentUser = null;
+                updateAuthUI();
+                renderFavorites();
+            }
+        } catch (error) {
+            currentUser = null;
+            updateAuthUI();
+        }
+    }
+
+    function updateAuthUI() {
+        if (currentUser) {
+            authBar.innerHTML = `<div class="user-info">
+                <span>Привет, ${currentUser.name}!</span>
+                <button class="logout-btn" id="logoutBtn">Выйти</button>
+            </div>`;
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) logoutBtn.addEventListener('click', logout);
+        } else {
+            authBar.innerHTML = `<button class="auth-btn" id="loginBtn">Войти</button>
+                <button class="auth-btn" id="registerBtn">Регистрация</button>`;
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            if (loginBtn) loginBtn.addEventListener('click', () => openModal());
+            if (registerBtn) registerBtn.addEventListener('click', () => openModal());
+        }
+        updateTooltips();
+    }
+
+    async function logout() {
+        await fetch('api/logout.php', { method: 'POST' });
+        currentUser = null;
+        favorites = [];
+        updateAuthUI();
+        updateCounters();
+        renderFavorites();
+    }
+
+    function openModal() {
+        if (authModal) {
+            authModal.classList.add('active');
+            generateCaptcha();
+            const answerInput = document.getElementById('captchaAnswer');
+            if (answerInput) answerInput.value = '';
+            if (authPasswordInput) authPasswordInput.value = '';
+        }
+    }
+    function closeModal() {
+        if (authModal) authModal.classList.remove('active');
+        if (authNameInput) authNameInput.value = '';
+        if (authEmailInput) authEmailInput.value = '';
+        if (authPasswordInput) authPasswordInput.value = '';
+        const captchaAnswer = document.getElementById('captchaAnswer');
+        if (captchaAnswer) captchaAnswer.value = '';
+    }
+
+    async function handleAuth() {
+        const name = authNameInput.value.trim();
+        const email = authEmailInput.value.trim();
+        const password = authPasswordInput.value.trim();
+        const captchaAnswer = document.getElementById('captchaAnswer');
+        const answer = parseInt(captchaAnswer.value.trim());
+
+        if (!name || !email || !password) {
+            alert('Заполните все поля');
+            return;
+        }
+        if (isNaN(answer) || answer !== captchaValue) {
+            alert('Неверный ответ на проверочный вопрос');
+            generateCaptcha();
+            captchaAnswer.value = '';
+            return;
+        }
+
+        let response = await fetch('api/register.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+        });
+        let result = await response.json();
+
+        if (result.success) {
+            currentUser = result.user;
+            closeModal();
+            updateAuthUI();
+            await loadFavorites();
+        } else {
+            response = await fetch('api/login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            result = await response.json();
+            if (result.success) {
+                currentUser = result.user;
+                closeModal();
+                updateAuthUI();
+                await loadFavorites();
+            } else {
+                alert(result.error);
+            }
+        }
+    }
+
+    function updateTooltips() {
+        const cartLink = document.querySelector('.icon-link[href="cart.html"]');
+        const favLink = document.querySelector('.icon-link[href="favorites.html"]');
+        if (cartLink) cartLink.title = currentUser ? 'Корзина' : 'Войдите в аккаунт, чтобы открыть корзину';
+        if (favLink) favLink.title = currentUser ? 'Избранное' : 'Войдите в аккаунт, чтобы открыть избранное';
+    }
+
+    async function loadFavorites() {
+        if (!currentUser) {
+            favorites = [];
+            renderFavorites();
+            updateCounters();
+            return;
+        }
+        try {
+            const response = await fetch('api/favorites.php');
+            const data = await response.json();
+            favorites = data.favorites || [];
+            renderFavorites();
+            updateCounters();
+        } catch (error) {
+            favorites = [];
+            renderFavorites();
+            updateCounters();
+        }
+    }
+
+    async function toggleFavorite(productId) {
+        if (!currentUser) {
+            alert('Войдите в аккаунт');
+            return false;
+        }
+        const response = await fetch('api/favorites.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: productId })
+        });
+        const result = await response.json();
+        if (result.success) {
+            await loadFavorites();
+            return true;
+        }
+        return false;
+    }
+
+    async function addToCartFromFav(productId) {
+        if (!currentUser) {
+            alert('Войдите в аккаунт');
+            return;
+        }
+        const response = await fetch('api/cart.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: productId, quantity: 1 })
+        });
+        if (response.ok) {
+            alert('Товар добавлен в корзину');
+            const cartResp = await fetch('api/cart.php');
+            const cartData = await cartResp.json();
+            const totalItems = (cartData.items || []).reduce((s, i) => s + i.quantity, 0);
+            if (cartCountSpan) cartCountSpan.textContent = totalItems;
+        } else {
+            alert('Ошибка добавления');
+        }
+    }
+
+    function renderFavorites() {
+        const container = document.getElementById('favoritesContent');
+        if (!container) return;
+
+        if (!currentUser) {
+            container.innerHTML = '<div class="favorites-items empty-favorites">Войдите в аккаунт, чтобы просмотреть избранное.</div>';
+            return;
+        }
+
+        if (favorites.length === 0) {
+            container.innerHTML = '<div class="favorites-items empty-favorites">Избранное пусто. Добавьте товары с главной страницы.</div>';
+            return;
+        }
+
+        let rowsHtml = '';
+        favorites.forEach(product => {
+            rowsHtml += `
+                <div class="favorites-row">
+                    <div class="favorites-item-title">${product.name}</div>
+                    <div class="favorites-item-price">${product.price} ₽</div>
+                    <div>
+                        <button class="add-to-cart-fav" onclick="addToCartFromFav(${product.id})">В корзину</button>
+                    </div>
+                    <div>
+                        <button class="favorites-remove" onclick="toggleFavorite(${product.id})">Удалить</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        const html = `
+            <div class="favorites-items">
+                <div class="favorites-header">
+                    <div>Товар</div>
+                    <div>Цена</div>
+                    <div>Действие</div>
+                    <div>Удалить</div>
+                </div>
+                ${rowsHtml}
+                <div class="favorites-actions">
+                    <a href="index.html" class="btn">Вернуться к покупкам</a>
+                </div>
+            </div>
+        `;
+        container.innerHTML = html;
+    }
+
+    function updateCounters() {
+        if (favoritesCountSpan) favoritesCountSpan.textContent = favorites.length;
+        // Обновление счётчика корзины (можно отдельно загрузить)
+        fetch('api/cart.php')
+            .then(res => res.json())
+            .then(data => {
+                const totalItems = (data.items || []).reduce((s, i) => s + i.quantity, 0);
+                if (cartCountSpan) cartCountSpan.textContent = totalItems;
+            })
+            .catch(() => {});
+    }
+
+    function openAdminPasswordModal() {
+        if (adminPasswordModal) adminPasswordModal.classList.add('active');
+        if (adminPasswordInput) adminPasswordInput.value = '';
+    }
+    function closeAdminPasswordModal() {
+        if (adminPasswordModal) adminPasswordModal.classList.remove('active');
+    }
+    function checkAdminPassword() {
+        const password = adminPasswordInput ? adminPasswordInput.value.trim() : '';
+        if (password === '4321') {
+            closeAdminPasswordModal();
+            window.location.href = 'admin.html';
+        } else {
+            alert('Неверный пароль');
+            if (adminPasswordInput) adminPasswordInput.value = '';
+        }
+    }
+
+    async function init() {
+        await checkSession();
+
+        if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+        if (submitAuthBtn) submitAuthBtn.addEventListener('click', handleAuth);
+        if (submitAdminPassword) submitAdminPassword.addEventListener('click', checkAdminPassword);
+        if (closeAdminModal) closeAdminModal.addEventListener('click', closeAdminPasswordModal);
+        if (adminMenuLink) {
+            adminMenuLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                openAdminPasswordModal();
+            });
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === authModal) closeModal();
+            if (e.target === adminPasswordModal) closeAdminPasswordModal();
+        });
+    }
+
+    window.toggleFavorite = toggleFavorite;
+    window.addToCartFromFav = addToCartFromFav;
+    init();
+</script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о товаре — Orders</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .info-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+        .product-info-img {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .product-info-img img {
+            max-width: 300px;
+            max-height: 300px;
+            object-fit: contain;
+        }
+        .product-info-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #1e2a2e;
+        }
+        .product-info-price {
+            font-size: 1.5rem;
+            color: #b45f2b;
+            margin-bottom: 1rem;
+        }
+        .product-info-description {
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            color: #2c3e2f;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 8px 16px;
+            background: #1e2a2e;
+            color: #f9e0a8;
+            text-decoration: none;
+            border-radius: 40px;
+        }
+        .back-link:hover {
+            background: #2c3e2f;
+        }
+        .not-found {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<input type="checkbox" id="menu-toggle" class="menu-checkbox">
+<header class="header">
+    <label for="menu-toggle" class="menu-toggle" aria-label="Меню">
+        <span></span><span></span><span></span>
+    </label>
+    <a href="index.html" class="logo">ORDERS</a>
+    <div class="header-icons">
+        <a href="index.html" class="home-link">Главная</a>
+        <a href="favorites.html" class="icon-link">
+            <img src="images/png-transparent-computer-icons-bookmark-others-lov-no-bg-preview (carve.photos).png" alt="Избранное" width="24" height="24">
+            <span class="badge" id="favoritesCount">0</span>
+        </a>
+        <a href="cart.html" class="icon-link">
+            <img src="images/11420218-no-bg-preview (carve.photos).png" alt="Корзина" width="24" height="24">
+            <span class="badge" id="cartCount">0</span>
+        </a>
+    </div>
+</header>
+
+<div class="drawer">
+    <div class="drawer-header">Меню</div>
+    <nav class="drawer-nav">
+        <a href="about.html">О нас</a>
+        <a href="delivery.html">Доставка и оплата</a>
+        <a href="profile.html">Личный кабинет</a>
+        <a href="#footer">Контакты</a>
+        <a href="#" id="adminMenuLink">Админ-панель</a>
+    </nav>
+</div>
+<label for="menu-toggle" class="overlay"></label>
+
+<div class="auth-bar" id="authBar">
+    <button class="auth-btn" id="loginBtn">Войти</button>
+    <button class="auth-btn" id="registerBtn">Регистрация</button>
+</div>
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <h3>Вход / Регистрация</h3>
+        <input type="text" id="authName" placeholder="Ваше имя" required>
+        <input type="email" id="authEmail" placeholder="Email" required>
+        <input type="password" id="authPassword" placeholder="Пароль" required>
+        <div class="captcha-block">
+            <p id="captchaQuestion">Сколько будет 5 + 3?</p>
+            <input type="text" id="captchaAnswer" placeholder="Ответ" required>
+        </div>
+        <button id="submitAuth">Продолжить</button>
+        <button id="closeModal">Отмена</button>
+    </div>
+</div>
+<div id="adminPasswordModal" class="modal">
+    <div class="modal-content">
+        <h3>Доступ к админ-панели</h3>
+        <p>Введите пароль администратора:</p>
+        <input type="password" id="adminPassword" placeholder="Пароль" required>
+        <button id="submitAdminPassword">Войти</button>
+        <button id="closeAdminModal">Отмена</button>
+    </div>
+</div>
+
+<div class="info-container" id="infoContainer">
+    <div class="loading">Загрузка информации...</div>
+</div>
+
+<footer class="site-footer" id="footer">
+    <div class="footer-content">
+        <p class="footer-text">Мы дорожим своей репутацией, поэтому каждый заказ проходит проверку перед отправкой. Вы всегда можете обратиться к нам для обмена, возврата или консультации.</p>
+        <div class="footer-contacts">
+            <div class="contact-item">- Email: info@orders.ru</div>
+            <div class="contact-item">- Телефон: +7 (995) 995-24-67</div>
+            <div class="contact-item">- Адрес: г. Москва, ул. Мира, д. 11</div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // ---------- ДАННЫЕ ТОВАРОВ (те же, что в базе) ----------
+    // Для надёжности используем массив, но можно было бы загружать через API.
+    // Здесь он совпадает с тем, что в БД.
+    const products = [
+        { id: 1, name: "Орден Ленина", price: 3500, img: "images/resize-no-bg-preview (carve.photos).png", description: "Высшая награда СССР, учреждена в 1930 году. Вручалась за выдающиеся заслуги перед государством." },
+        { id: 2, name: "Орден Красной Звезды", price: 3200, img: "images/ndptydgbmh0i3szeysn4hhvebt8dmjgw-no-bg-preview (carve.photos).png", description: "Учреждён в 1930 году. Награждались военнослужащие за заслуги в обороне СССР." },
+        { id: 3, name: "Орден Отечественной войны", price: 4100, img: "images/7200331923-no-bg-preview (carve.photos).png", description: "Учреждён в 1942 году. Имеет две степени. Вручался за мужество и героизм на фронте." },
+        { id: 4, name: "Медаль «За отвагу»", price: 1800, img: "images/orig-no-bg-preview (carve.photos).png", description: "Государственная награда СССР и РФ. Вручается за личное мужество в бою." },
+        { id: 5, name: "Медаль «За безупречную службу»", price: 1600, img: "images/6387689298-no-bg-preview (carve.photos).png", description: "Ведомственная награда за долголетнюю безупречную службу." },
+        { id: 6, name: "Знак «За заслуги»", price: 700, img: "images/1464937_mainViewLot_2x-no-bg-preview (carve.photos).png", description: "Общественная награда за вклад в развитие общества." },
+        { id: 7, name: "Медаль «Ветерану боевых действий»", price: 1500, img: "images/ka0r0vs9lkub3yrq3dydq32p0bkyryki-no-bg-preview (carve.photos).png", description: "Награда для участников локальных конфликтов." },
+        { id: 8, name: "Знак «Участник боевых действий»", price: 1200, img: "images/7182945832-no-bg-preview (carve.photos).png", description: "Знак отличия для военнослужащих, выполнявших боевые задачи." },
+        { id: 100, name: "Футляр для ордена", price: 450, img: "images/orig1-Photoroom.png", description: "Защитный футляр для хранения орденов из бархата и пластика." },
+        { id: 101, name: "Футляр для медали", price: 400, img: "images/херсон (12).зтп-Photoroom.png", description: "Компактный футляр для медалей." },
+        { id: 102, name: "Планшет для наград", price: 1200, img: "images/shop_property_file_6366_220-Photoroom.png", description: "Деревянный планшет с бархатным покрытием для размещения наград." }
+    ];
+
+    // Получаем id из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = parseInt(urlParams.get('id'));
+
+    // Находим товар
+    const product = products.find(p => p.id === productId);
+
+    const container = document.getElementById('infoContainer');
+
+    if (!product) {
+        container.innerHTML = `<div class="not-found">Товар не найден. <a href="index.html" class="back-link">Вернуться на главную</a></div>`;
+    } else {
+        container.innerHTML = `
+            <div class="product-info-img">
+                <img src="${product.img}" alt="${product.name}">
+            </div>
+            <h1 class="product-info-title">${product.name}</h1>
+            <div class="product-info-price">${product.price} ₽</div>
+            <div class="product-info-description">
+                ${product.description}
+            </div>
+            <a href="index.html" class="back-link">← Назад к покупкам</a>
+        `;
+    }
+
+    // ---------- АВТОРИЗАЦИЯ И СЧЁТЧИКИ (общая логика) ----------
+    let currentUser = null;
+    let cart = [];
+    let favorites = [];
+
+    const authBar = document.getElementById('authBar');
+    const authModal = document.getElementById('authModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const submitAuthBtn = document.getElementById('submitAuth');
+    const authNameInput = document.getElementById('authName');
+    const authEmailInput = document.getElementById('authEmail');
+    const authPasswordInput = document.getElementById('authPassword');
+    const cartCountSpan = document.getElementById('cartCount');
+    const favoritesCountSpan = document.getElementById('favoritesCount');
+    const adminPasswordModal = document.getElementById('adminPasswordModal');
+    const adminPasswordInput = document.getElementById('adminPassword');
+    const submitAdminPassword = document.getElementById('submitAdminPassword');
+    const closeAdminModal = document.getElementById('closeAdminModal');
+    const adminMenuLink = document.getElementById('adminMenuLink');
+
+    let captchaValue = 0;
+    function generateCaptcha() {
+        const num1 = Math.floor(Math.random() * 10) + 1;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+        captchaValue = num1 + num2;
+        const question = `Сколько будет ${num1} + ${num2}?`;
+        const captchaQuestion = document.getElementById('captchaQuestion');
+        if (captchaQuestion) captchaQuestion.textContent = question;
+    }
+
+    async function checkSession() {
+        try {
+            const response = await fetch('api/check_session.php');
+            const data = await response.json();
+            if (data.logged_in) {
+                currentUser = data.user;
+                updateAuthUI();
+                await loadCart();
+                await loadFavorites();
+            } else {
+                currentUser = null;
+                updateAuthUI();
+            }
+        } catch (error) {
+            currentUser = null;
+            updateAuthUI();
+        }
+    }
+
+    function updateAuthUI() {
+        if (currentUser) {
+            authBar.innerHTML = `<div class="user-info">
+                <span>Привет, ${currentUser.name}!</span>
+                <button class="logout-btn" id="logoutBtn">Выйти</button>
+            </div>`;
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) logoutBtn.addEventListener('click', logout);
+        } else {
+            authBar.innerHTML = `<button class="auth-btn" id="loginBtn">Войти</button>
+                <button class="auth-btn" id="registerBtn">Регистрация</button>`;
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            if (loginBtn) loginBtn.addEventListener('click', () => openModal());
+            if (registerBtn) registerBtn.addEventListener('click', () => openModal());
+        }
+        updateTooltips();
+    }
+
+    async function logout() {
+        await fetch('api/logout.php', { method: 'POST' });
+        currentUser = null;
+        cart = [];
+        favorites = [];
+        updateAuthUI();
+        updateCounters();
+    }
+
+    function openModal() {
+        if (authModal) {
+            authModal.classList.add('active');
+            generateCaptcha();
+            const answerInput = document.getElementById('captchaAnswer');
+            if (answerInput) answerInput.value = '';
+            if (authPasswordInput) authPasswordInput.value = '';
+        }
+    }
+    function closeModal() {
+        if (authModal) authModal.classList.remove('active');
+        if (authNameInput) authNameInput.value = '';
+        if (authEmailInput) authEmailInput.value = '';
+        if (authPasswordInput) authPasswordInput.value = '';
+        const captchaAnswer = document.getElementById('captchaAnswer');
+        if (captchaAnswer) captchaAnswer.value = '';
+    }
+
+    async function handleAuth() {
+        const name = authNameInput.value.trim();
+        const email = authEmailInput.value.trim();
+        const password = authPasswordInput.value.trim();
+        const captchaAnswer = document.getElementById('captchaAnswer');
+        const answer = parseInt(captchaAnswer.value.trim());
+
+        if (!name || !email || !password) {
+            alert('Заполните все поля');
+            return;
+        }
+        if (isNaN(answer) || answer !== captchaValue) {
+            alert('Неверный ответ на проверочный вопрос');
+            generateCaptcha();
+            captchaAnswer.value = '';
+            return;
+        }
+
+        let response = await fetch('api/register.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+        });
+        let result = await response.json();
+
+        if (result.success) {
+            currentUser = result.user;
+            closeModal();
+            updateAuthUI();
+            await loadCart();
+            await loadFavorites();
+        } else {
+            response = await fetch('api/login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            result = await response.json();
+            if (result.success) {
+                currentUser = result.user;
+                closeModal();
+                updateAuthUI();
+                await loadCart();
+                await loadFavorites();
+            } else {
+                alert(result.error);
+            }
+        }
+    }
+
+    function updateTooltips() {
+        const cartLink = document.querySelector('.icon-link[href="cart.html"]');
+        const favLink = document.querySelector('.icon-link[href="favorites.html"]');
+        if (cartLink) cartLink.title = currentUser ? 'Корзина' : 'Войдите в аккаунт, чтобы открыть корзину';
+        if (favLink) favLink.title = currentUser ? 'Избранное' : 'Войдите в аккаунт, чтобы открыть избранное';
+    }
+
+    async function loadCart() {
+        if (!currentUser) return;
+        try {
+            const response = await fetch('api/cart.php');
+            const data = await response.json();
+            cart = data.items || [];
+            updateCounters();
+        } catch (error) {
+            cart = [];
+            updateCounters();
+        }
+    }
+
+    async function loadFavorites() {
+        if (!currentUser) return;
+        try {
+            const response = await fetch('api/favorites.php');
+            const data = await response.json();
+            favorites = data.favorites || [];
+            updateCounters();
+        } catch (error) {
+            favorites = [];
+            updateCounters();
+        }
+    }
+
+    function updateCounters() {
+        const totalItems = cart.reduce((sum, i) => sum + (i.quantity || 1), 0);
+        if (cartCountSpan) cartCountSpan.textContent = totalItems;
+        if (favoritesCountSpan) favoritesCountSpan.textContent = favorites.length;
+    }
+
+    function openAdminPasswordModal() {
+        if (adminPasswordModal) adminPasswordModal.classList.add('active');
+        if (adminPasswordInput) adminPasswordInput.value = '';
+    }
+    function closeAdminPasswordModal() {
+        if (adminPasswordModal) adminPasswordModal.classList.remove('active');
+    }
+    function checkAdminPassword() {
+        const password = adminPasswordInput ? adminPasswordInput.value.trim() : '';
+        if (password === '4321') {
+            closeAdminPasswordModal();
+            window.location.href = 'admin.html';
+        } else {
+            alert('Неверный пароль');
+            if (adminPasswordInput) adminPasswordInput.value = '';
+        }
+    }
+
+    async function init() {
+        await checkSession();
+
+        if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+        if (submitAuthBtn) submitAuthBtn.addEventListener('click', handleAuth);
+        if (submitAdminPassword) submitAdminPassword.addEventListener('click', checkAdminPassword);
+        if (closeAdminModal) closeAdminModal.addEventListener('click', closeAdminPasswordModal);
+        if (adminMenuLink) {
+            adminMenuLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                openAdminPasswordModal();
+            });
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === authModal) closeModal();
+            if (e.target === adminPasswordModal) closeAdminPasswordModal();
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>
